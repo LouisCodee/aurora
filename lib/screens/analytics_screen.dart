@@ -3,20 +3,18 @@ import '../core/theme.dart';
 import '../widgets/shared_widgets.dart';
 
 class AnalyticsScreen extends StatefulWidget {
-  const AnalyticsScreen({super.key});
+  final bool isInternal;
+  const AnalyticsScreen({super.key, this.isInternal = false});
 
   @override
   State<AnalyticsScreen> createState() => _AnalyticsScreenState();
 }
 
 class _AnalyticsScreenState extends State<AnalyticsScreen> {
-  int _currentIndex = 3;
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AuroraColors.background,
-      body: Stack(
+    Widget body = Stack(
         children: [
           // Background Glow
           Positioned(
@@ -59,19 +57,13 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
             ),
           ),
 
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: AuroraNavBar(
-              currentIndex: _currentIndex,
-              onTap: (index) {
-                if (index == 0) Navigator.pushReplacementNamed(context, '/dashboard');
-                if (index == 2) Navigator.pushReplacementNamed(context, '/calendar');
-                if (index == 4) Navigator.pushReplacementNamed(context, '/settings');
-              },
-            ),
-          ),
         ],
-      ),
+      );
+
+    if (widget.isInternal) return body;
+    return Scaffold(
+      backgroundColor: AuroraColors.background,
+      body: body,
     );
   }
 
@@ -164,13 +156,13 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                     end: Alignment.bottomCenter,
                     colors: [
                       AuroraColors.accent,
-                      AuroraColors.accent.withOpacity(0.3),
+                      AuroraColors.accent.withValues(alpha: 0.3),
                     ],
                   ),
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(6)),
                   boxShadow: [
                     BoxShadow(
-                      color: AuroraColors.accent.withOpacity(0.2),
+                      color: AuroraColors.accent.withValues(alpha: 0.2),
                       blurRadius: 10,
                     ),
                   ],
@@ -238,7 +230,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                     color: color,
                     borderRadius: BorderRadius.circular(10),
                     boxShadow: [
-                      BoxShadow(color: color.withOpacity(0.4), blurRadius: 8),
+                      BoxShadow(color: color.withValues(alpha: 0.4), blurRadius: 8),
                     ],
                   ),
                 ),

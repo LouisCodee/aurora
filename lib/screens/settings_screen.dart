@@ -3,23 +3,21 @@ import '../core/theme.dart';
 import '../widgets/shared_widgets.dart';
 
 class SettingsScreen extends StatefulWidget {
-  const SettingsScreen({super.key});
+  final bool isInternal;
+  const SettingsScreen({super.key, this.isInternal = false});
 
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  int _currentIndex = 4;
   bool _notifications = true;
   bool _darkMode = true;
   bool _biometrics = false;
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AuroraColors.background,
-      body: Stack(
+    Widget body = Stack(
         children: [
           // Background Glow
           Positioned(
@@ -76,19 +74,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
 
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: AuroraNavBar(
-              currentIndex: _currentIndex,
-              onTap: (index) {
-                if (index == 0) Navigator.pushReplacementNamed(context, '/dashboard');
-                if (index == 2) Navigator.pushReplacementNamed(context, '/calendar');
-                if (index == 3) Navigator.pushReplacementNamed(context, '/analytics');
-              },
-            ),
-          ),
         ],
-      ),
+      );
+
+    if (widget.isInternal) return body;
+    return Scaffold(
+      backgroundColor: AuroraColors.background,
+      body: body,
     );
   }
 
@@ -195,8 +187,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           Switch.adaptive(
             value: value,
             onChanged: onChanged,
-            activeColor: AuroraColors.accent,
-            activeTrackColor: AuroraColors.accent.withOpacity(0.3),
+            activeTrackColor: AuroraColors.accent.withValues(alpha: 0.3),
+            activeThumbColor: AuroraColors.accent,
           ),
         ],
       ),

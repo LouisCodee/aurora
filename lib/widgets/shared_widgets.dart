@@ -39,10 +39,10 @@ class AuroraNavBar extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: isSelected
             ? BoxDecoration(
-                color: AuroraColors.accentGlow,
+                color: AuroraColors.accent.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: AuroraColors.accent.withOpacity(0.4),
+                color: AuroraColors.accent.withValues(alpha: 0.4),
                   width: 1,
                 ),
               )
@@ -100,7 +100,7 @@ class AuroraButton extends StatelessWidget {
                 borderRadius: BorderRadius.circular(100),
                 boxShadow: [
                   BoxShadow(
-                    color: AuroraColors.accent.withOpacity(0.3),
+                    color: AuroraColors.accent.withValues(alpha: 0.3),
                     blurRadius: 20,
                     spreadRadius: 0,
                     offset: const Offset(0, 5),
@@ -111,7 +111,7 @@ class AuroraButton extends StatelessWidget {
                 color: Colors.transparent,
                 borderRadius: BorderRadius.circular(100),
                 border: Border.all(
-                  color: AuroraColors.accent.withOpacity(0.5),
+                  color: AuroraColors.accent.withValues(alpha: 0.5),
                   width: 1.5,
                 ),
               ),
@@ -215,10 +215,10 @@ class GlowDot extends StatelessWidget {
       height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: color.withOpacity(0.3),
+        color: color.withValues(alpha: 0.3),
         boxShadow: [
           BoxShadow(
-            color: color.withOpacity(0.6),
+            color: color.withValues(alpha: 0.6),
             blurRadius: size * 2,
             spreadRadius: 0,
           ),
@@ -243,9 +243,9 @@ class PriorityBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
+        color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.4), width: 1),
+        border: Border.all(color: color.withValues(alpha: 0.4), width: 1),
       ),
       child: Text(
         label,

@@ -103,12 +103,12 @@ class AuroraDecorations {
         gradient: AuroraGradients.card,
         borderRadius: BorderRadius.circular(radius),
         border: Border.all(
-          color: AuroraColors.accent.withOpacity(0.15),
+          color: AuroraColors.accent.withValues(alpha: 0.15),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: AuroraColors.accent.withOpacity(0.05),
+            color: AuroraColors.accent.withValues(alpha: 0.05),
             blurRadius: 20,
             spreadRadius: 0,
           ),
@@ -123,7 +123,7 @@ class AuroraDecorations {
         ),
         borderRadius: BorderRadius.circular(radius),
         border: Border.all(
-          color: AuroraColors.accent.withOpacity(0.3),
+          color: AuroraColors.accent.withValues(alpha: 0.3),
           width: 1,
         ),
       );
@@ -132,12 +132,12 @@ class AuroraDecorations {
     color: AuroraColors.navBar,
     borderRadius: BorderRadius.circular(30),
     border: Border.all(
-      color: AuroraColors.accent.withOpacity(0.2),
+      color: AuroraColors.accent.withValues(alpha: 0.2),
       width: 1,
     ),
     boxShadow: [
       BoxShadow(
-        color: AuroraColors.accent.withOpacity(0.08),
+        color: AuroraColors.accent.withValues(alpha: 0.08),
         blurRadius: 30,
         spreadRadius: 0,
         offset: const Offset(0, -5),

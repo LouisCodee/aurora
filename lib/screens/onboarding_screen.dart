@@ -77,7 +77,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
                     colors: [
-                      AuroraColors.accent.withOpacity(0.15),
+                      AuroraColors.accent.withValues(alpha: 0.15),
                       Colors.transparent,
                     ],
                   ),
@@ -101,7 +101,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
                     colors: [
-                      AuroraColors.purple.withOpacity(0.12),
+                      AuroraColors.purple.withValues(alpha: 0.12),
                       Colors.transparent,
                     ],
                   ),
@@ -131,7 +131,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                               color: AuroraColors.accentGlow,
                               borderRadius: BorderRadius.circular(20),
                               border: Border.all(
-                                color: AuroraColors.accent.withOpacity(0.3),
+                                color: AuroraColors.accent.withValues(alpha: 0.3),
                               ),
                             ),
                             child: const Text(
@@ -181,7 +181,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                                       shape: BoxShape.circle,
                                       border: Border.all(
                                         color: AuroraColors.accent
-                                            .withOpacity(0.1),
+                                            .withValues(alpha: 0.1),
                                         width: 1,
                                       ),
                                     ),
@@ -194,7 +194,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                                       shape: BoxShape.circle,
                                       border: Border.all(
                                         color: AuroraColors.accent
-                                            .withOpacity(0.2),
+                                            .withValues(alpha: 0.2),
                                         width: 1,
                                       ),
                                     ),
@@ -207,18 +207,18 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                                       shape: BoxShape.circle,
                                       gradient: RadialGradient(
                                         colors: [
-                                          AuroraColors.accent.withOpacity(0.25),
+                                          AuroraColors.accent.withValues(alpha: 0.25),
                                           AuroraColors.accentGlow,
                                         ],
                                       ),
                                       border: Border.all(
-                                        color: AuroraColors.accent.withOpacity(0.5),
+                                        color: AuroraColors.accent.withValues(alpha: 0.5),
                                         width: 1.5,
                                       ),
                                       boxShadow: [
                                         BoxShadow(
                                           color:
-                                              AuroraColors.accent.withOpacity(0.3),
+                                              AuroraColors.accent.withValues(alpha: 0.3),
                                           blurRadius: 30,
                                           spreadRadius: 0,
                                         ),

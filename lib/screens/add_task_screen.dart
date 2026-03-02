@@ -127,10 +127,10 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
           duration: const Duration(milliseconds: 200),
           padding: const EdgeInsets.symmetric(vertical: 14),
           decoration: BoxDecoration(
-            color: isSelected ? color.withOpacity(0.15) : AuroraColors.surfaceLight,
+            color: isSelected ? color.withValues(alpha: 0.15) : AuroraColors.surfaceLight,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: isSelected ? color.withOpacity(0.5) : AuroraColors.divider,
+              color: isSelected ? color.withValues(alpha: 0.5) : AuroraColors.divider,
               width: 1.5,
             ),
           ),

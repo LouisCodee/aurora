@@ -3,20 +3,18 @@ import '../core/theme.dart';
 import '../widgets/shared_widgets.dart';
 
 class DashboardScreen extends StatefulWidget {
-  const DashboardScreen({super.key});
+  final bool isInternal;
+  const DashboardScreen({super.key, this.isInternal = false});
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  int _currentIndex = 0;
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AuroraColors.background,
-      body: Stack(
+    Widget body = Stack(
         children: [
           // Background Glows
           Positioned(
@@ -80,35 +78,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
           ),
 
-          // Bottom Navigation
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: AuroraNavBar(
-              currentIndex: _currentIndex,
-              onTap: (index) {
-                setState(() => _currentIndex = index);
-                if (index == 2) Navigator.pushNamed(context, '/calendar');
-                if (index == 3) Navigator.pushNamed(context, '/analytics');
-                if (index == 4) Navigator.pushNamed(context, '/settings');
-              },
-            ),
-          ),
-
-          // FAB
-          Positioned(
-            bottom: 95,
-            right: 24,
-            child: FloatingActionButton(
-              onPressed: () => Navigator.pushNamed(context, '/add-task'),
-              backgroundColor: AuroraColors.accent,
-              foregroundColor: AuroraColors.background,
-              shape: const CircleBorder(),
-              elevation: 4,
-              child: const Icon(Icons.add, size: 28),
-            ),
-          ),
         ],
-      ),
+      );
+
+    if (widget.isInternal) return body;
+    return Scaffold(
+      backgroundColor: AuroraColors.background,
+      body: body,
     );
   }
 
@@ -269,7 +245,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(icon, color: color, size: 24),

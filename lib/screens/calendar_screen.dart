@@ -3,20 +3,18 @@ import '../core/theme.dart';
 import '../widgets/shared_widgets.dart';
 
 class CalendarScreen extends StatefulWidget {
-  const CalendarScreen({super.key});
+  final bool isInternal;
+  const CalendarScreen({super.key, this.isInternal = false});
 
   @override
   State<CalendarScreen> createState() => _CalendarScreenState();
 }
 
 class _CalendarScreenState extends State<CalendarScreen> {
-  int _currentIndex = 2;
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AuroraColors.background,
-      body: Stack(
+    Widget body = Stack(
         children: [
           // Background Glow
           Positioned(
@@ -57,19 +55,13 @@ class _CalendarScreenState extends State<CalendarScreen> {
             ),
           ),
 
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: AuroraNavBar(
-              currentIndex: _currentIndex,
-              onTap: (index) {
-                if (index == 0) Navigator.pushReplacementNamed(context, '/dashboard');
-                if (index == 3) Navigator.pushReplacementNamed(context, '/analytics');
-                if (index == 4) Navigator.pushReplacementNamed(context, '/settings');
-              },
-            ),
-          ),
         ],
-      ),
+      );
+
+    if (widget.isInternal) return body;
+    return Scaffold(
+      backgroundColor: AuroraColors.background,
+      body: body,
     );
   }
 
@@ -168,7 +160,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
           decoration: BoxDecoration(
             color: isSelected ? AuroraColors.accent : Colors.transparent,
             borderRadius: BorderRadius.circular(10),
-            border: isSelected ? null : Border.all(color: AuroraColors.divider.withOpacity(0.5)),
+            border: isSelected ? null : Border.all(color: AuroraColors.divider.withValues(alpha: 0.5)),
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -223,7 +215,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
           Container(
             width: 2,
             height: 30,
-            color: color.withOpacity(0.3),
+            color: color.withValues(alpha: 0.3),
           ),
           const SizedBox(width: 16),
           Expanded(

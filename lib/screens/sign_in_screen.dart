@@ -48,7 +48,7 @@ class _SignInScreenState extends State<SignInScreen>
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    AuroraColors.accent.withOpacity(0.1),
+                    AuroraColors.accent.withValues(alpha: 0.1),
                     Colors.transparent,
                   ],
                 ),
@@ -65,7 +65,7 @@ class _SignInScreenState extends State<SignInScreen>
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    AuroraColors.purple.withOpacity(0.1),
+                    AuroraColors.purple.withValues(alpha: 0.1),
                     Colors.transparent,
                   ],
                 ),
@@ -113,17 +113,17 @@ class _SignInScreenState extends State<SignInScreen>
                               shape: BoxShape.circle,
                               gradient: RadialGradient(
                                 colors: [
-                                  AuroraColors.accent.withOpacity(0.25),
+                                  AuroraColors.accent.withValues(alpha: 0.25),
                                   AuroraColors.accentGlow,
                                 ],
                               ),
                               border: Border.all(
-                                color: AuroraColors.accent.withOpacity(0.5),
+                                color: AuroraColors.accent.withValues(alpha: 0.5),
                                 width: 1.5,
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: AuroraColors.accent.withOpacity(0.25),
+                                  color: AuroraColors.accent.withValues(alpha: 0.25),
                                   blurRadius: 25,
                                 ),
                               ],
