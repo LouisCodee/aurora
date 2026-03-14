@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 import '../core/theme.dart';
 import '../widgets/shared_widgets.dart';
+import '../core/di/injection_container.dart';
+import '../features/register/domain/repositories/register_repository.dart';
+import '../features/register/domain/entities/user_entity.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../features/tasks/presentation/bloc/tasks_bloc.dart';
+import '../features/tasks/domain/entities/task_entity.dart';
 
 class DashboardScreen extends StatefulWidget {
   final bool isInternal;
@@ -11,6 +17,22 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
+  UserEntity? currentUser;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUser();
+  }
+
+  Future<void> _loadUser() async {
+    final user = await sl<RegisterRepository>().getSavedUser();
+    if (mounted) {
+      setState(() {
+        currentUser = user;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,44 +56,66 @@ class _DashboardScreenState extends State<DashboardScreen> {
               children: [
                 _buildHeader(),
                 Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const SizedBox(height: 32),
-                        _buildGreeting(),
-                        const SizedBox(height: 32),
-                        _buildProjectDeadlineCard(),
-                        const SizedBox(height: 40),
-                        _buildSectionHeader('Upcoming Tasks', 'See all'),
-                        const SizedBox(height: 16),
-                        _buildTaskItem(
-                          'Review Marketing Assets',
-                          'Due in 2 hours',
-                          'High',
-                          AuroraColors.pink,
-                          Icons.campaign_rounded,
+                  child: BlocBuilder<TasksBloc, TasksState>(
+                    builder: (context, state) {
+                      List<TaskEntity> tasks = [];
+                      if (state is TasksLoaded) {
+                        tasks = state.tasks;
+                      }
+                      final upNext = tasks.isNotEmpty ? tasks.first : null;
+                      final otherTasks = tasks.length > 1 ? tasks.skip(1).take(3).toList() : <TaskEntity>[];
+
+                      return SingleChildScrollView(
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(height: 32),
+                            _buildGreeting(),
+                            const SizedBox(height: 32),
+                            _buildProjectDeadlineCard(upNext),
+                            const SizedBox(height: 40),
+                            _buildSectionHeader('Upcoming Tasks', 'See all'),
+                            const SizedBox(height: 16),
+                            if (otherTasks.isEmpty && upNext == null) ...[
+                              const Center(
+                                child: Padding(
+                                  padding: EdgeInsets.all(32.0),
+                                  child: Text(
+                                    'Looks like your schedule is completely clear.',
+                                    style: TextStyle(color: AuroraColors.textSecondary),
+                                  ),
+                                ),
+                              ),
+                            ] else ...[
+                              ...otherTasks.map((t) {
+                                Color color;
+                                IconData icon;
+                                switch(t.priority) {
+                                  case 'High':
+                                    color = AuroraColors.pink;
+                                    icon = Icons.notifications_active_rounded;
+                                    break;
+                                  case 'Medium':
+                                    color = AuroraColors.orange;
+                                    icon = Icons.assignment_rounded;
+                                    break;
+                                  default:
+                                    color = AuroraColors.green;
+                                    icon = Icons.check_circle_outline_rounded;
+                                    break;
+                                }
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: 16),
+                                  child: _buildTaskItem(t.title, '${t.notificationTime} • ${t.duration}', t.priority, color, icon),
+                                );
+                              }),
+                            ],
+                            const SizedBox(height: 100),
+                          ],
                         ),
-                        const SizedBox(height: 16),
-                        _buildTaskItem(
-                          'Grocery Shopping',
-                          'Due tomorrow',
-                          'Medium',
-                          AuroraColors.orange,
-                          Icons.shopping_cart_rounded,
-                        ),
-                        const SizedBox(height: 16),
-                        _buildTaskItem(
-                          'Yoga Session',
-                          'Oct 26, 08:00 AM',
-                          'Low',
-                          AuroraColors.green,
-                          Icons.self_improvement_rounded,
-                        ),
-                        const SizedBox(height: 100),
-                      ],
-                    ),
+                      );
+                    },
                   ),
                 ),
               ],
@@ -109,9 +153,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
               shape: BoxShape.circle,
               border: Border.all(color: AuroraColors.accent, width: 2),
             ),
-            child: const CircleAvatar(
+            child: CircleAvatar(
               radius: 18,
-              backgroundImage: NetworkImage('https://i.pravatar.cc/150?u=luis'),
+              backgroundColor: AuroraColors.accent.withValues(alpha: 0.2),
+              child: Text(
+                currentUser?.name.isNotEmpty == true 
+                    ? currentUser!.name[0].toUpperCase() 
+                    : 'A',
+                style: const TextStyle(
+                  color: AuroraColors.accent,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
           ),
         ],
@@ -120,23 +173,79 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildGreeting() {
+    String greeting = 'Hello';
+    final hour = DateTime.now().hour;
+    if (hour < 12) greeting = 'Good Morning';
+    else if (hour < 17) greeting = 'Good Afternoon';
+    else greeting = 'Good Evening';
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Good Evening, Luis',
+        Text(
+          '$greeting, ${currentUser?.name ?? 'Guest'}',
           style: AuroraTextStyles.heading1,
         ),
         const SizedBox(height: 4),
         Text(
-          'Monday, October 24',
+          '${_getFormattedDate()}',
           style: AuroraTextStyles.body,
         ),
       ],
     );
   }
 
-  Widget _buildProjectDeadlineCard() {
+  String _getFormattedDate() {
+    final now = DateTime.now();
+    const weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    return '${weekdays[now.weekday - 1]}, ${months[now.month - 1]} ${now.day}';
+  }
+
+  Widget _buildProjectDeadlineCard(TaskEntity? task) {
+    if (task == null) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(24),
+        decoration: AuroraDecorations.accentCard(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const PriorityBadge(label: 'ALL CLEAR', color: Colors.white),
+                const Icon(Icons.check_circle_outline_rounded, color: Colors.white),
+              ],
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              'No upcoming tasks!',
+              style: AuroraTextStyles.heading2,
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Take a moment to relax or tap the + button to add a new objective.',
+              style: AuroraTextStyles.bodySmall,
+            ),
+          ],
+        ),
+      );
+    }
+
+    Color color;
+    switch(task.priority) {
+      case 'High':
+        color = AuroraColors.pink;
+        break;
+      case 'Medium':
+        color = AuroraColors.orange;
+        break;
+      default:
+        color = AuroraColors.green;
+        break;
+    }
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(24),
@@ -147,28 +256,32 @@ class _DashboardScreenState extends State<DashboardScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const PriorityBadge(label: 'URGENT', color: AuroraColors.accent),
+              PriorityBadge(label: task.priority.toUpperCase(), color: color),
               const Icon(Icons.more_horiz_rounded, color: Colors.white70),
             ],
           ),
           const SizedBox(height: 20),
-          const Text(
-            'Project Alpha Deadline',
+          Text(
+            task.title,
             style: AuroraTextStyles.heading2,
           ),
-          const SizedBox(height: 8),
-          const Text(
-            'Complete all design handovers for the mobile workspace module.',
-            style: AuroraTextStyles.bodySmall,
-          ),
+          if (task.description.isNotEmpty && task.description != 'No description') ...[
+            const SizedBox(height: 8),
+            Text(
+              task.description,
+              style: AuroraTextStyles.bodySmall,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
           const SizedBox(height: 24),
           Row(
             children: [
               const Icon(Icons.timer_outlined, color: AuroraColors.accent, size: 16),
               const SizedBox(width: 8),
-              const Text(
-                'Today, 11:59 PM',
-                style: TextStyle(
+              Text(
+                '${task.notificationTime} • ${task.duration}',
+                style: const TextStyle(
                   color: AuroraColors.accent,
                   fontSize: 13,
                   fontWeight: FontWeight.w600,

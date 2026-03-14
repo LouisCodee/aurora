@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../core/theme.dart';
 import 'shared_widgets.dart';
+import '../features/tasks/presentation/bloc/tasks_bloc.dart';
+import '../features/tasks/domain/entities/task_entity.dart';
 
 class AddTaskModal extends StatefulWidget {
   const AddTaskModal({super.key});
@@ -13,6 +16,9 @@ class _AddTaskModalState extends State<AddTaskModal> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descController = TextEditingController();
   String _selectedPriority = 'Medium';
+  TimeOfDay? _notificationTime;
+  String _selectedDuration = '30 Min';
+  final List<String> _durations = ['15 Min', '30 Min', '1 Hour', '2 Hours', 'Custom'];
 
   @override
   Widget build(BuildContext context) {
@@ -78,11 +84,45 @@ class _AddTaskModalState extends State<AddTaskModal> {
                       _buildPriorityOption('High', AuroraColors.pink),
                     ],
                   ),
+                  const SizedBox(height: 24),
+
+                  Text('TIME & DURATION', style: AuroraTextStyles.label),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildTimePickerField(),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: _buildDurationDropdown(),
+                      ),
+                    ],
+                  ),
                   const SizedBox(height: 32),
 
                   AuroraButton(
                     text: 'Create Task',
-                    onPressed: () => Navigator.pop(context),
+                    onPressed: () {
+                      final title = _titleController.text.trim();
+                      if (title.isEmpty) return; // Optionally show a toast
+
+                      final desc = _descController.text.trim();
+                      
+                      final task = TaskEntity(
+                        id: DateTime.now().millisecondsSinceEpoch.toString(),
+                        title: title,
+                        description: desc.isEmpty ? 'No description' : desc,
+                        priority: _selectedPriority,
+                        notificationTime: _notificationTime != null 
+                            ? _notificationTime!.format(context) 
+                            : 'No Time',
+                        duration: _selectedDuration,
+                      );
+
+                      context.read<TasksBloc>().add(AddTask(task));
+                      Navigator.pop(context);
+                    },
                     icon: Icons.add_rounded,
                   ),
                   const SizedBox(height: 32),
@@ -132,6 +172,110 @@ class _AddTaskModalState extends State<AddTaskModal> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTimePickerField() {
+    return GestureDetector(
+      onTap: () async {
+        final TimeOfDay? picked = await showTimePicker(
+          context: context,
+          initialTime: _notificationTime ?? TimeOfDay.now(),
+          builder: (context, child) {
+            return Theme(
+              data: Theme.of(context).copyWith(
+                colorScheme: const ColorScheme.dark(
+                  primary: AuroraColors.accent,
+                  onPrimary: Colors.white,
+                  surface: AuroraColors.surfaceLight,
+                  onSurface: Colors.white,
+                ),
+                textButtonTheme: TextButtonThemeData(
+                  style: TextButton.styleFrom(
+                    foregroundColor: AuroraColors.accent,
+                  ),
+                ),
+              ),
+              child: child!,
+            );
+          },
+        );
+        if (picked != null) {
+          setState(() {
+            _notificationTime = picked;
+          });
+        }
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: AuroraColors.surfaceLight,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AuroraColors.divider),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.access_time_filled_rounded, color: AuroraColors.accent, size: 18),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                _notificationTime != null
+                    ? _notificationTime!.format(context)
+                    : 'Set Time',
+                style: TextStyle(
+                  color: _notificationTime != null ? Colors.white : AuroraColors.textSecondary,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDurationDropdown() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      decoration: BoxDecoration(
+        color: AuroraColors.surfaceLight,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AuroraColors.divider),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: _selectedDuration,
+          icon: const Icon(Icons.keyboard_arrow_down_rounded, color: AuroraColors.textSecondary),
+          isDense: false,
+          dropdownColor: AuroraColors.surfaceLight,
+          isExpanded: true,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+          ),
+          onChanged: (String? newValue) {
+            if (newValue != null) {
+              setState(() {
+                _selectedDuration = newValue;
+              });
+            }
+          },
+          items: _durations.map<DropdownMenuItem<String>>((String value) {
+            return DropdownMenuItem<String>(
+              value: value,
+              child: Row(
+                children: [
+                  const Icon(Icons.timer_outlined, color: AuroraColors.purple, size: 18),
+                  const SizedBox(width: 8),
+                  Text(value),
+                ],
+              ),
+            );
+          }).toList(),
         ),
       ),
     );

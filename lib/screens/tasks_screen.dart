@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../core/theme.dart';
 import '../widgets/shared_widgets.dart';
+import '../features/tasks/presentation/bloc/tasks_bloc.dart';
+import '../features/tasks/domain/entities/task_entity.dart';
 
 class TasksScreen extends StatefulWidget {
   const TasksScreen({super.key});
@@ -10,74 +13,81 @@ class TasksScreen extends StatefulWidget {
 }
 
 class _TasksScreenState extends State<TasksScreen> {
-  final List<Map<String, dynamic>> _tasks = [
-    {
-      'title': 'Design Workspace Module',
-      'deadline': 'Due today, 6:00 PM',
-      'priority': 'High',
-      'color': AuroraColors.pink,
-      'icon': Icons.design_services_rounded,
-    },
-    {
-      'title': 'Review API Integration',
-      'deadline': 'Due tomorrow, 10:00 AM',
-      'priority': 'Medium',
-      'color': AuroraColors.accent,
-      'icon': Icons.api_rounded,
-    },
-    {
-      'title': 'Weekly Sync Meeting',
-      'deadline': 'Oct 28, 02:00 PM',
-      'priority': 'Low',
-      'color': AuroraColors.green,
-      'icon': Icons.groups_rounded,
-    },
-    {
-      'title': 'Update Documentation',
-      'deadline': 'Oct 30, 11:59 PM',
-      'priority': 'Low',
-      'color': AuroraColors.purple,
-      'icon': Icons.description_rounded,
-    },
-  ];
-
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SizedBox(height: 32),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Active Tasks', style: AuroraTextStyles.heading1),
-              const SizedBox(height: 8),
-              Text(
-                'Managing ${_tasks.length} objectives',
-                style: AuroraTextStyles.body,
-              ),
-            ],
+    return BlocBuilder<TasksBloc, TasksState>(
+      builder: (context, state) {
+        if (state is TasksLoaded) {
+          final tasks = state.tasks;
+          return SafeArea(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 16),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('Active Tasks', style: AuroraTextStyles.heading1),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Managing ${tasks.length} objectives',
+                        style: AuroraTextStyles.body,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 32),
+                Expanded(
+                  child: tasks.isEmpty
+                      ? const Center(
+                          child: Text(
+                            'No active tasks. Create a new one!',
+                            style: TextStyle(color: AuroraColors.textSecondary, fontSize: 16),
+                          ),
+                        )
+                      : ListView.separated(
+                          padding: const EdgeInsets.fromLTRB(24, 0, 24, 120),
+                          itemCount: tasks.length,
+                          separatorBuilder: (ctx, i) => const SizedBox(height: 16),
+                          itemBuilder: (ctx, i) {
+                            final task = tasks[i];
+                            return _buildTaskCard(task);
+                          },
+                        ),
+                ),
+              ],
+            ),
+          );
+        }
+        return const Center(
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation(AuroraColors.accent),
           ),
-        ),
-        const SizedBox(height: 32),
-        Expanded(
-          child: ListView.separated(
-            padding: const EdgeInsets.fromLTRB(24, 0, 24, 120),
-            itemCount: _tasks.length,
-            separatorBuilder: (ctx, i) => const SizedBox(height: 16),
-            itemBuilder: (ctx, i) {
-              final task = _tasks[i];
-              return _buildTaskCard(task);
-            },
-          ),
-        ),
-      ],
+        );
+      },
     );
   }
 
-  Widget _buildTaskCard(Map<String, dynamic> task) {
+  Widget _buildTaskCard(TaskEntity task) {
+    Color color;
+    IconData icon;
+    
+    switch(task.priority) {
+      case 'High':
+        color = AuroraColors.pink;
+        icon = Icons.notifications_active_rounded;
+        break;
+      case 'Medium':
+        color = AuroraColors.orange;
+        icon = Icons.assignment_rounded;
+        break;
+      default:
+        color = AuroraColors.green;
+        icon = Icons.check_circle_outline_rounded;
+        break;
+    }
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: AuroraDecorations.glowCard(radius: 20),
@@ -86,10 +96,10 @@ class _TasksScreenState extends State<TasksScreen> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: task['color'].withOpacity(0.1),
+              color: color.withOpacity(0.1),
               borderRadius: BorderRadius.circular(16),
             ),
-            child: Icon(task['icon'], color: task['color'], size: 24),
+            child: Icon(icon, color: color, size: 24),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -97,18 +107,38 @@ class _TasksScreenState extends State<TasksScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
-                      child: Text(
-                        task['title'],
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                        ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            task.title,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          if (task.description.isNotEmpty && task.description != 'No description')
+                            Padding(
+                              padding: const EdgeInsets.only(top: 4),
+                              child: Text(
+                                task.description,
+                                style: const TextStyle(
+                                  color: AuroraColors.textSecondary,
+                                  fontSize: 13,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                        ],
                       ),
                     ),
-                    PriorityBadge(label: task['priority'], color: task['color']),
+                    const SizedBox(width: 8),
+                    PriorityBadge(label: task.priority, color: color),
                   ],
                 ),
                 const SizedBox(height: 8),
@@ -117,7 +147,7 @@ class _TasksScreenState extends State<TasksScreen> {
                     const Icon(Icons.timer_outlined, color: AuroraColors.textDim, size: 14),
                     const SizedBox(width: 6),
                     Text(
-                      task['deadline'],
+                      '${task.notificationTime} • ${task.duration}',
                       style: AuroraTextStyles.bodySmall,
                     ),
                   ],

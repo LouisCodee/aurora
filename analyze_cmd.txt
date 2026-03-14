@@ -1,0 +1,7 @@
+Analyzing lib...                                                
+
+   info - The type parameter name 'Type' matches a visible type name - lib\core\usecases\usecase.dart:2:24 - avoid_types_as_parameter_names
+   info - Unnecessary use of multiple underscores - lib\features\onboarding\presentation\pages\onboarding_page.dart:184:44 - unnecessary_underscores
+warning - Unused import: '../../../register/presentation/pages/register_page.dart' - lib\features\splash\presentation\pages\splash_page.dart:10:8 - unused_import
+
+3 issues found. (ran in 2.1s)
